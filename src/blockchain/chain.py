@@ -2,13 +2,23 @@ from typing import List, Dict, Any
 from .block import Block
 import time
 
+from icontract import require, ensure
+
 class Blockchain:
     """
     Blockchain class managing the chain of blocks.
     Handles block creation, validation, and difficulty adjustment.
     """
+
+    chain: List[Block]
+    pending_transactions: List[Dict[str, Any]]
+    difficulty: int
+    target_block_time: float
+    block_times: List[float]
+    adjustment_interval: int
+    time_tolerance: float
     
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize blockchain with genesis block and default parameters.
         """
@@ -44,6 +54,14 @@ class Blockchain:
         """
         return self.chain[-1]
 
+    @require(lambda self, transaction: isinstance(transaction, dict),
+             "Transaction must be a dictionary.")
+    @require(lambda self, transaction:
+             "sender" in transaction and "recipient" in transaction,
+             "Transaction must contain sender and recipient.")
+    @ensure(lambda self, transaction:
+            transaction in self.pending_transactions,
+            "Transaction must be recorded in pending_transactions.")
     def add_transaction(self, transaction: Dict[str, Any]) -> None:
         """
         Add a new transaction to pending transactions.
@@ -70,6 +88,18 @@ class Blockchain:
             
         self.block_times = []
 
+    @require(lambda self:
+             isinstance(self.pending_transactions, list),
+             "pending_transactions must be a list.")
+    @require(lambda self:
+             len(self.pending_transactions) > 0,
+             "There must be at least one pending transaction to mine.")
+    @ensure(lambda self, result:
+            result in self.chain,
+            "Newly mined block must be appended to the chain.")
+    @ensure(lambda self, result:
+            self.pending_transactions == [],
+            "pending_transactions should be cleared after mining.")
     def mine_pending_transactions(self) -> Block:
         """
         Mine pending transactions into a new block.
@@ -102,6 +132,8 @@ class Blockchain:
         self.pending_transactions = []
         return new_block
 
+    @ensure(lambda self, result: isinstance(result, bool),
+            "is_chain_valid must return a boolean value.")
     def is_chain_valid(self) -> bool:
         """
         Validate the entire blockchain.
@@ -125,6 +157,14 @@ class Blockchain:
 
         return True
     
+    @require(lambda self, index:
+             0 <= index < len(self.chain),
+             "Index must be within the range of the chain.")
+    @ensure(lambda self, index, result:
+            isinstance(result, dict)
+            and "previous_link_ok" in result
+            and "next_link_ok" in result,
+            "Result must contain previous_link_ok and next_link_ok flags.")
     def verify_linkage(self, index: int) -> Dict[str, Any]:
         """
         Verify the linkage of block at the given index:

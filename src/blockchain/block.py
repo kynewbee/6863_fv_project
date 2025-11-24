@@ -3,6 +3,8 @@ import json
 import time
 from typing import List, Dict, Any, Tuple
 
+from icontract import require, ensure
+
 def hash_pair(a: str, b: str) -> str:
     """
     Calculate combined hash of two hash values.
@@ -16,6 +18,13 @@ def hash_pair(a: str, b: str) -> str:
     """
     return hashlib.sha256((a + b).encode()).hexdigest()
 
+@require(lambda tx_hashes: tx_hashes is not None)
+@require(lambda tx_hashes:
+         all(isinstance(h, str) for h in tx_hashes),
+         "All transaction hashes must be strings.")
+@ensure(lambda tx_hashes, result:
+        isinstance(result, str) and len(result) == 64,
+        "Merkle root must be a 64-character hex string.")
 def compute_merkle_root(tx_hashes: List[str]) -> str:
     """
     Calculate Merkle root hash from transaction hashes.
@@ -43,9 +52,19 @@ class Block:
     Block class representing a block in the blockchain.
     Contains transactions, timestamp, and cryptographic hashes.
     """
+
+    index: int
+    transactions: List[Dict[str, Any]]
+    previous_hash: str
+    timestamp: float
+    difficulty: int
+    nonce: int
+    hash: str
+    merkle_root: str
+    merkle_tree: List[List[str]]
     
     def __init__(self, index: int, transactions: List[Dict[str, Any]], 
-                 previous_hash: str, timestamp: float = None, difficulty: int = 2):
+                 previous_hash: str, timestamp: float = None, difficulty: int = 2)-> None:
         """
         Initialize a new block.
         
@@ -110,12 +129,22 @@ class Block:
         }, sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
 
+    @require(lambda self: isinstance(self.difficulty, int) and self.difficulty > 0,
+             "Difficulty must be a positive integer.")
+    @ensure(lambda self:
+            isinstance(self.hash, str)
+            and self.hash.startswith('0' * self.difficulty),
+            "Mined hash must satisfy the difficulty prefix.")
     def mine_block(self) -> None:
         """
         Mine block by finding nonce that satisfies difficulty requirement.
         Updates block hash and nonce.
         """
         prefix = '0' * self.difficulty
+
+        if not hasattr(self, "hash") or not isinstance(self.hash, str):
+            self.hash = self.calculate_hash()
+
         while not self.hash.startswith(prefix):
             self.nonce += 1
             self.hash = self.calculate_hash()
@@ -153,6 +182,17 @@ class Block:
         
         return original_tx, original_merkle
 
+    @ensure(
+        lambda self, result:
+        isinstance(result, dict)
+        and {"merkle_ok", "hash_ok", "expected_merkle_root", "expected_hash"} <= result.keys(),
+        "verify_self must return a dict with the required keys."
+    )
+    @ensure(
+        lambda self, result:
+        isinstance(result["merkle_ok"], bool) and isinstance(result["hash_ok"], bool),
+        "merkle_ok and hash_ok must be boolean flags."
+    )
     def verify_self(self) -> Dict[str, Any]:
         """
         Verify the internal integrity of this block:
