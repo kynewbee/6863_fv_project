@@ -1,0 +1,28 @@
+[
+  {
+    "id": "SYNC_LONGER_CHAIN",
+    "description": "Peer advertises chain with +1 block, should replace local chain",
+    "expected_result": "replace"
+  },
+  {
+    "id": "SYNC_EQUAL_LENGTH_HIGHER_WORK",
+    "description": "Peer chain has same length but higher cumulative work",
+    "expected_result": "replace"
+  },
+  {
+    "id": "SYNC_INVALID_CHAIN",
+    "description": "Peer sends chain with broken linkage",
+    "expected_result": "reject"
+  },
+  {
+    "id": "SYNC_SHORTER_CHAIN",
+    "description": "Peer offers shorter chain, should be ignored",
+    "expected_result": "reject"
+  },
+  {
+    "id": "SYNC_NETWORK_ERROR",
+    "description": "Peer endpoint raises connection error",
+    "expected_result": "no_change"
+  }
+]
+

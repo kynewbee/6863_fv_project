@@ -1,0 +1,24 @@
+[
+  {
+    "id": "VOTES_MIXED_AMOUNTS",
+    "description": "Mixture of amount=1 and other values to ensure only real votes are counted",
+    "transactions": [
+      {"sender": "v-ai-1", "recipient": "alice", "amount": 2},
+      {"sender": "v-ai-2", "recipient": "bob", "amount": "one"},
+      {"sender": "v-ai-3", "recipient": "carol", "amount": 1}
+    ],
+    "expected_totals": {
+      "carol": 1
+    }
+  },
+  {
+    "id": "VOTES_MISSING_RECIPIENT",
+    "description": "AI suggested vote transaction missing recipient field",
+    "transactions": [
+      {"sender": "attacker-ai", "amount": 1}
+    ],
+    "expected_total_votes": 0,
+    "notes": "Endpoint currently crashes with KeyError instead of ignoring."
+  }
+]
+

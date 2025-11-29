@@ -1,0 +1,22 @@
+[
+  {
+    "id": "STATUS_NOT_VOTED_LONG_ID",
+    "description": "64-char suffix voter ID suggested by GenAI to test lookup bounds",
+    "voter": "user-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "expected_has_voted": false
+  },
+  {
+    "id": "STATUS_SQLI_STYLE",
+    "description": "SQL injection looking string to ensure safe lookup",
+    "voter": "admin' OR '1'='1",
+    "expected_has_voted": false
+  },
+  {
+    "id": "STATUS_INCONSISTENT_STATE",
+    "description": "voted_users contains entry but chain lacks transaction",
+    "voter": "ghost-ai",
+    "expected_has_voted": false,
+    "notes": "Current implementation incorrectly reports True."
+  }
+]
+

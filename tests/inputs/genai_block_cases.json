@@ -1,0 +1,45 @@
+[
+  {
+    "id": "BLOCK_VALID_STANDARD",
+    "description": "Baseline block payload generated via GenAI prompt for honest peer",
+    "kind": "valid",
+    "expected_status": 200
+  },
+  {
+    "id": "BLOCK_HASH_MISMATCH",
+    "description": "GenAI suggests rewiring hash to all zeros to see if node verifies integrity",
+    "mutation": {
+      "hash": "0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0"
+    },
+    "expected_status": 400,
+    "expected_reason": "hash_mismatch"
+  },
+  {
+    "id": "BLOCK_PREV_HASH_MISMATCH",
+    "description": "Previous hash replaced with fake value to simulate fork attack",
+    "mutation": {
+      "previous_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "expected_status": 400,
+    "expected_reason": "previous_hash_mismatch"
+  },
+  {
+    "id": "BLOCK_INVALID_POW",
+    "description": "Hash forced to non-zero prefix so difficulty check fails",
+    "mutation": {
+      "hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "expected_status": 400,
+    "expected_reason": "invalid_proof_of_work"
+  },
+  {
+    "id": "BLOCK_MISSING_FIELDS",
+    "description": "AI intentionally drops required fields to trigger format rejection",
+    "custom_payload": {
+      "hash": "abc123"
+    },
+    "expected_status": 400,
+    "expected_reason": "invalid_format"
+  }
+]
+

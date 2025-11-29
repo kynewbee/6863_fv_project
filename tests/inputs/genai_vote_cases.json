@@ -1,0 +1,48 @@
+[
+  {
+    "id": "VOTE_VALID_STANDARD",
+    "description": "Simple voter/candidate pair proposed by GenAI for baseline success",
+    "payload": {
+      "voter": "alice-ai",
+      "candidate": "bob-ai"
+    },
+    "expected_status": 200,
+    "generated_by": "genai",
+    "human_decision": "accepted"
+  },
+  {
+    "id": "VOTE_MISSING_CANDIDATE",
+    "description": "AI suggested omitting candidate field to test validation",
+    "payload": {
+      "voter": "erin-ai"
+    },
+    "expected_status": 400,
+    "generated_by": "genai",
+    "human_decision": "accepted"
+  },
+  {
+    "id": "VOTE_NON_JSON_FORM",
+    "description": "AI proposed form-encoded body to see if API enforces JSON",
+    "transport": "form",
+    "raw": "voter=mallory-ai&candidate=trent-ai",
+    "expected_status": 400,
+    "generated_by": "genai",
+    "human_decision": "accepted_with_warning",
+    "notes": "Currently triggers 500 because request.is_json is not checked."
+  },
+  {
+    "id": "VOTE_VOTER_DICT",
+    "description": "AI generated payload where voter field is an object",
+    "payload": {
+      "voter": {
+        "$gt": ""
+      },
+      "candidate": "bob-ai"
+    },
+    "expected_status": 400,
+    "generated_by": "genai",
+    "human_decision": "modified",
+    "notes": "Should reject non-string voter but implementation currently raises 500."
+  }
+]
+

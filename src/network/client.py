@@ -30,7 +30,7 @@ parser.add_argument('--tracker-url', type=str, default='http://localhost:6000',
                     help='URL of the tracker server (default: http://localhost:6000)')
 parser.add_argument('--host', type=str, default='0.0.0.0',
                     help='Host IP to bind to (default: 0.0.0.0)')
-args = parser.parse_args()
+args, _unknown = parser.parse_known_args()
 
 # Set port from command line argument if provided
 if args.port:
